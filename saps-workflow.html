@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAPS Police Clearance NZ — Project Workflow</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0A0F1E;
+    --navy-mid: #111827;
+    --navy-light: #1C2640;
+    --blue: #1D4ED8;
+    --blue-bright: #3B82F6;
+    --cyan: #06B6D4;
+    --green: #10B981;
+    --amber: #F59E0B;
+    --red: #EF4444;
+    --slate: #94A3B8;
+    --slate-light: #CBD5E1;
+    --white: #F8FAFC;
+    --border: rgba(255,255,255,0.07);
+    --phase1: #3B82F6;
+    --phase2: #8B5CF6;
+    --phase3: #06B6D4;
+    --phase4: #F59E0B;
+    --phase5: #10B981;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* GRID BG */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    padding: 56px 0 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 56px;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    background: rgba(6,182,212,0.1);
+    border: 1px solid rgba(6,182,212,0.25);
+    padding: 5px 12px;
+    border-radius: 2px;
+  }
+
+  .status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+  }
+
+  .status-dot::before {
+    content: '';
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+
+  h1 span {
+    background: linear-gradient(120deg, var(--blue-bright), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    color: var(--slate);
+    font-weight: 300;
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  /* META ROW */
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .meta-chip {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--slate);
+    background: var(--navy-light);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .meta-chip strong { color: var(--slate-light); }
+
+  /* KPI STRIP */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 64px;
+  }
+
+  .kpi-card {
+    background: var(--navy-mid);
+    padding: 20px 22px;
+    transition: background 0.2s;
+  }
+
+  .kpi-card:hover { background: var(--navy-light); }
+
+  .kpi-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 8px;
+  }
+
+  .kpi-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--slate);
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* PHASE TIMELINE */
+  .phases {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 72px;
+  }
+
+  .phase {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--navy-mid);
+    transition: border-color 0.2s;
+  }
+
+  .phase:hover { border-color: rgba(255,255,255,0.14); }
+
+  .phase-header {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .phase-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.08);
+    line-height: 1;
+  }
+
+  .phase-meta { }
+
+  .phase-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+
+  .phase-timing {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--slate);
+  }
+
+  .phase-tags {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 3px 9px;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+
+  .phase-bar {
+    height: 3px;
+    border-radius: 0;
+    margin: 0 24px 0;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+
+  .phase:hover .phase-bar { opacity: 1; }
+
+  .phase-body {
+    padding: 0 24px 24px;
+    display: none;
+  }
+
+  .phase.open .phase-body { display: block; }
+
+  .phase-toggle {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--slate);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .phase-toggle:hover {
+    background: var(--navy-light);
+    color: var(--white);
+  }
+
+  /* TASKS INSIDE PHASE */
+  .tasks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .task-group {
+    background: var(--navy);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 16px;
+  }
+
+  .task-group-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    font-size: 13px;
+    color: var(--slate-light);
+    line-height: 1.45;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+
+  .task-item:last-child { border-bottom: none; }
+  .task-item:hover { color: var(--white); }
+
+  .checkbox {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 2px;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+
+  .task-item.done .checkbox {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .task-item.done .checkbox::after {
+    content: '✓';
+    font-size: 9px;
+    color: white;
+    font-weight: bold;
+  }
+
+  .task-item.done span {
+    text-decoration: line-through;
+    color: var(--slate);
+    opacity: 0.6;
+  }
+
+  /* PHASE COLORS */
+  .p1 { --pc: var(--phase1); }
+  .p2 { --pc: var(--phase2); }
+  .p3 { --pc: var(--phase3); }
+  .p4 { --pc: var(--phase4); }
+  .p5 { --pc: var(--phase5); }
+
+  .phase-bar { background: var(--pc); }
+  .phase-title { color: var(--pc); }
+  .tag-phase { background: color-mix(in srgb, var(--pc) 15%, transparent); color: var(--pc); border: 1px solid color-mix(in srgb, var(--pc) 30%, transparent); }
+
+  /* TECH STACK */
+  .tech-section {
+    margin-bottom: 72px;
+  }
+
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .tech-card {
+    background: var(--navy-mid);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    transition: all 0.2s;
+  }
+
+  .tech-card:hover {
+    background: var(--navy-light);
+    border-color: rgba(255,255,255,0.12);
+    transform: translateY(-2px);
+  }
+
+  .tech-category {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 12px;
+  }
+
+  .tech-items {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .tech-item {
+    font-size: 13px;
+    color: var(--slate-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tech-item::before {
+    content: '→';
+    color: var(--slate);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+  }
+
+  /* KPI TABLE */
+  .kpi-section { margin-bottom: 72px; }
+
+  .kpi-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .kpi-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--slate);
+    text-align: left;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--navy-mid);
+  }
+
+  .kpi-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--slate-light);
+    vertical-align: top;
+  }
+
+  .kpi-table tr:hover td {
+    background: rgba(255,255,255,0.02);
+    color: var(--white);
+  }
+
+  .kpi-table .metric { color: var(--white); font-weight: 500; }
+  .kpi-table .target { color: var(--cyan); font-family: 'DM Mono', monospace; font-size: 12px; }
+
+  .timeline-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 2px;
+    color: var(--slate);
+  }
+
+  /* RISK */
+  .risk-section { margin-bottom: 72px; }
+
+  .risk-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .risk-card {
+    background: var(--navy-mid);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 18px 20px;
+    transition: all 0.2s;
+  }
+
+  .risk-card:hover {
+    background: var(--navy-light);
+    border-color: rgba(255,255,255,0.12);
+  }
+
+  .risk-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .risk-icon {
+    width: 20px; height: 20px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+
+  .risk-text {
+    font-size: 12px;
+    color: var(--slate);
+    line-height: 1.6;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 0;
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .footer-left {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--slate);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 16px;
+  }
+
+  .footer-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--slate);
+    text-decoration: none;
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .footer-link:hover { color: var(--cyan); }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    margin-top: 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 2px;
+    height: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue-bright), var(--cyan));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--slate);
+    margin-top: 6px;
+    text-align: right;
+  }
+
+  /* CMD BLOCK */
+  .cmd-block {
+    background: var(--navy);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--slate-light);
+    line-height: 1.8;
+    margin-top: 12px;
+    overflow-x: auto;
+  }
+
+  .cmd-comment { color: rgba(148,163,184,0.45); }
+  .cmd-cmd { color: var(--cyan); }
+  .cmd-flag { color: var(--phase1); }
+
+  @media (max-width: 640px) {
+    .phase-header { grid-template-columns: 40px 1fr; }
+    .phase-tags { display: none; }
+    .tasks-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-top">
+      <span class="badge">Client Workflow Document</span>
+      <span class="status-dot">Ready for Implementation</span>
+    </div>
+    <h1>SAPS Police Clearance <span>NZ</span><br>Deployment Workflow</h1>
+    <p class="subtitle">A structured, phased rollout plan covering foundation, content, integration, marketing, and ongoing maintenance — from day one to full operation.</p>
+    <div class="meta-row">
+      <div class="meta-chip">📅 <strong>Updated:</strong> 17 May 2026</div>
+      <div class="meta-chip">📌 <strong>Version:</strong> 1.0</div>
+      <div class="meta-chip">✉️ <strong>Contact:</strong> elanza@sapspoliceclearance.com</div>
+      <div class="meta-chip">🔗 <strong>Repo:</strong> Iammypictures/Sapspoliceclearancenz</div>
+    </div>
+  </header>
+
+  <!-- KPI STRIP -->
+  <div class="kpi-strip">
+    <div class="kpi-card">
+      <div class="kpi-label">Phases</div>
+      <div class="kpi-value">5</div>
+      <div class="kpi-sub">Sequential stages</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Timeline</div>
+      <div class="kpi-value">6w+</div>
+      <div class="kpi-sub">Active + ongoing</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Organic Target</div>
+      <div class="kpi-value">1K+</div>
+      <div class="kpi-sub">Sessions / month</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Conversion Goal</div>
+      <div class="kpi-value">3–5%</div>
+      <div class="kpi-sub">By Month 2</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Domain Authority</div>
+      <div class="kpi-value">25+</div>
+      <div class="kpi-sub">By Month 6</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Top 10 Rank</div>
+      <div class="kpi-value">M4</div>
+      <div class="kpi-sub">Primary keywords</div>
+    </div>
+  </div>
+
+  <!-- PHASES -->
+  <div class="section-label">Project Phases</div>
+
+  <div class="phases">
+
+    <!-- PHASE 1 -->
+    <div class="phase p1 open">
+      <div class="phase-header" onclick="togglePhase(this)">
+        <div class="phase-num">01</div>
+        <div class="phase-meta">
+          <div class="phase-title">Foundation Setup</div>
+          <div class="phase-timing">Weeks 1 – 2 &nbsp;·&nbsp; Infrastructure & Auth</div>
+        </div>
+        <div class="phase-tags">
+          <span class="tag tag-phase">Critical Path</span>
+          <button class="phase-toggle">Collapse ▲</button>
+        </div>
+      </div>
+      <div class="phase-bar"></div>
+      <div class="phase-body">
+        <div class="tasks-grid">
+
+          <div class="task-group">
+            <div class="task-group-title">1.1 — Domain & Hosting</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Primary domain DNS — sapspoliceclearance.com</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Secondary domain redirect — sapspoliceclearence.com</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>GitHub Pages hosting activated</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>SSL/TLS certificates provisioned</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>CDN configuration (if applicable)</span></div>
+          </div>
+
+          <div class="task-group">
+            <div class="task-group-title">1.2 — Google Workspace & Auth</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Create Google Workspace for elanza@sapspoliceclearance.com</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Verify domain ownership in Search Console</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Set up Google Analytics 4 property</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Configure Google Ads account</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Enable Google Cloud Console API access</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Create service accounts for integrations</span></div>
+          </div>
+
+          <div class="task-group">
+            <div class="task-group-title">1.3 — Repository Init</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Clone repository locally</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Create directory structure (assets, pages)</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Initialise git workflow & branching strategy</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Set up GitHub Actions for CI/CD</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Create deployment documentation</span></div>
+          </div>
+
+        </div>
+
+        <div class="cmd-block">
+          <span class="cmd-comment"># Clone & branch for new features</span><br>
+          <span class="cmd-cmd">git clone</span> https://github.com/Iammypictures/Sapspoliceclearancenz.git<br>
+          <span class="cmd-cmd">git checkout</span> <span class="cmd-flag">-b</span> feature/foundation-setup<br>
+          <span class="cmd-cmd">git add</span> . &amp;&amp; <span class="cmd-cmd">git commit</span> <span class="cmd-flag">-m</span> "Phase 1: Foundation setup"<br>
+          <span class="cmd-cmd">git push</span> origin feature/foundation-setup
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="phase p2">
+      <div class="phase-header" onclick="togglePhase(this)">
+        <div class="phase-num">02</div>
+        <div class="phase-meta">
+          <div class="phase-title">Content & SEO Implementation</div>
+          <div class="phase-timing">Weeks 2 – 3 &nbsp;·&nbsp; Pages, SEO, Analytics</div>
+        </div>
+        <div class="phase-tags">
+          <span class="tag tag-phase">High Priority</span>
+          <button class="phase-toggle">Expand ▼</button>
+        </div>
+      </div>
+      <div class="phase-bar"></div>
+      <div class="phase-body">
+        <div class="tasks-grid">
+
+          <div class="task-group">
+            <div class="task-group-title">2.1 — Page Content</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Homepage — hero, verification form, CTA</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Services page — SAPS overview, fingerprint, forensic</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Process flow — step-by-step, timeline, docs required</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Contact page — form, hours, locations, support</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Testimonials & trust indicators</span></div>
+          </div>
+
+          <div class="task-group">
+            <div class="task-group-title">2.2 — SEO Optimisation</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Meta tags — title, description, keywords all pages</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>schema.json structured data</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Image alt text & optimisation</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Internal linking strategy</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>sitemap.xml + robots.txt</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Canonical tags for duplicate content</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Open Graph meta tags</span></div>
+          </div>
+
+          <div class="task-group">
+            <div class="task-group-title">2.3 — Analytics Setup</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Add GA4 tracking code to all pages</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Set up conversion goals</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Configure event tracking (forms, clicks)</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Create KPI monitoring dashboards</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Set up daily reporting</span></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 3 -->
+    <div class="phase p3">
+      <div class="phase-header" onclick="togglePhase(this)">
+        <div class="phase-num">03</div>
+        <div class="phase-meta">
+          <div class="phase-title">Subsite Integration</div>
+          <div class="phase-timing">Weeks 3 – 4 &nbsp;·&nbsp; Fingerprint, Forensic, Proteus</div>
+        </div>
+        <div class="phase-tags">
+          <span class="tag tag-phase">Integration</span>
+          <button class="phase-toggle">Expand ▼</button>
+        </div>
+      </div>
+      <div class="phase-bar"></div>
+      <div class="phase-body">
+        <div class="tasks-grid">
+
+          <div class="task-group">
+            <div class="task-group-title">3.1 — Fingerprintservices.co.nz</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Create subsite directory structure</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Fingerprint-specific landing page</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Service details and pricing</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Booking / request form</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Cross-link to primary domain + canonical tags</span></div>
+          </div>
+
+          <div class="task-group">
+            <div class="task-group-title">3.2 — Forensic Insight Blog</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Create blog/insights section</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Write thought leadership articles</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>SEO-optimised blog template</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Author bios and credentials</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>RSS feed + internal linking to services</span></div>
+          </div>
+
+          <div class="task-group">
+            <div class="task-group-title">3.3 — Proteus Integration</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Integrate iamstiaan.github.io/Proteus/</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Test new features / UX improvements</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>A/B testing framework</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Performance monitoring</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>User feedback collection</span></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 4 -->
+    <div class="phase p4">
+      <div class="phase-header" onclick="togglePhase(this)">
+        <div class="phase-num">04</div>
+        <div class="phase-meta">
+          <div class="phase-title">Campaign & Marketing</div>
+          <div class="phase-timing">Weeks 4 – 6 &nbsp;·&nbsp; Ads, Domains, Reporting</div>
+        </div>
+        <div class="phase-tags">
+          <span class="tag tag-phase">Growth</span>
+          <button class="phase-toggle">Expand ▼</button>
+        </div>
+      </div>
+      <div class="phase-bar"></div>
+      <div class="phase-body">
+        <div class="tasks-grid">
+
+          <div class="task-group">
+            <div class="task-group-title">4.1 — Google Ads Campaigns</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Campaign 1: SAPS Police Clearance — Search</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Campaign 2: Fingerprint Services — Display</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Campaign 3: Local NZ targeting</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Campaign 4: Retargeting (website visitors)</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Daily budgets, bidding strategies, conversion tracking</span></div>
+          </div>
+
+          <div class="task-group">
+            <div class="task-group-title">4.2 — Domain Forwarding</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Create list of 100+ spelling variations</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Configure DNS forwarding for each variation</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Test all forwarding URLs</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Implement email forwarding aliases</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Document forwarding inventory</span></div>
+          </div>
+
+          <div class="task-group">
+            <div class="task-group-title">4.3 — Analytics & Reporting</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Create performance dashboard</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Weekly reporting schedule</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Automated alerts</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Custom dimensions / metrics</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>KPI benchmarks established</span></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 5 -->
+    <div class="phase p5">
+      <div class="phase-header" onclick="togglePhase(this)">
+        <div class="phase-num">05</div>
+        <div class="phase-meta">
+          <div class="phase-title">Ongoing Maintenance & Optimisation</div>
+          <div class="phase-timing">Continuous &nbsp;·&nbsp; Content, Performance, SEO, Campaigns</div>
+        </div>
+        <div class="phase-tags">
+          <span class="tag tag-phase">Evergreen</span>
+          <button class="phase-toggle">Expand ▼</button>
+        </div>
+      </div>
+      <div class="phase-bar"></div>
+      <div class="phase-body">
+        <div class="tasks-grid">
+
+          <div class="task-group">
+            <div class="task-group-title">5.1 — Content Management</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Weekly Forensic Insight blog posts</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Monthly content updates across all pages</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Ongoing SEO keyword analysis</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>User feedback implementation</span></div>
+          </div>
+
+          <div class="task-group">
+            <div class="task-group-title">5.2 — Performance Monitoring</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Daily GA4 dashboard review</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Weekly traffic analysis</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Monthly conversion rate optimisation</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Quarterly SEO audit</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Annual security assessment</span></div>
+          </div>
+
+          <div class="task-group">
+            <div class="task-group-title">5.3 – 5.4 — Campaign & Link Authority</div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>A/B test landing pages</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Refine audience targeting & bid strategies</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Monitor competitor activity</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Build high-quality backlinks (50+ by M6)</span></div>
+            <div class="task-item" onclick="toggleTask(this)"><div class="checkbox"></div><span>Guest blogging & industry partnership outreach</span></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="tech-section">
+    <div class="section-label">Technology Stack</div>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-category">Frontend</div>
+        <div class="tech-items">
+          <div class="tech-item">HTML5</div>
+          <div class="tech-item">CSS3 (Responsive)</div>
+          <div class="tech-item">JavaScript ES6+</div>
+          <div class="tech-item">Bootstrap / Custom CSS</div>
+        </div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-category">Backend (Optional)</div>
+        <div class="tech-items">
+          <div class="tech-item">Node.js / Python</div>
+          <div class="tech-item">Google Cloud Functions</div>
+          <div class="tech-item">Serverless architecture</div>
+        </div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-category">Hosting & Version Control</div>
+        <div class="tech-items">
+          <div class="tech-item">GitHub (version control)</div>
+          <div class="tech-item">GitHub Pages (hosting)</div>
+          <div class="tech-item">Cloudflare (CDN/security)</div>
+        </div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-category">Google Ecosystem</div>
+        <div class="tech-items">
+          <div class="tech-item">Google Workspace</div>
+          <div class="tech-item">Google Analytics 4</div>
+          <div class="tech-item">Google Ads</div>
+          <div class="tech-item">Google Search Console</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI TABLE -->
+  <div class="kpi-section">
+    <div class="section-label">Success Metrics — KPIs</div>
+    <table class="kpi-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Target</th>
+          <th>Timeline</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="metric">Organic Traffic</td><td class="target">1,000+ sessions/month</td><td><span class="timeline-pill">Month 3</span></td></tr>
+        <tr><td class="metric">Conversion Rate</td><td class="target">3–5%</td><td><span class="timeline-pill">Month 2</span></td></tr>
+        <tr><td class="metric">Domain Authority</td><td class="target">25+</td><td><span class="timeline-pill">Month 6</span></td></tr>
+        <tr><td class="metric">Google Ranking</td><td class="target">Top 10 for primary keywords</td><td><span class="timeline-pill">Month 4</span></td></tr>
+        <tr><td class="metric">Page Load Speed</td><td class="target">&lt;3 seconds</td><td><span class="timeline-pill">Month 1</span></td></tr>
+        <tr><td class="metric">Mobile Conversion</td><td class="target">40% of total conversions</td><td><span class="timeline-pill">Month 2</span></td></tr>
+        <tr><td class="metric">Email List Growth</td><td class="target">500+ subscribers</td><td><span class="timeline-pill">Month 3</span></td></tr>
+        <tr><td class="metric">Quality Backlinks</td><td class="target">50+</td><td><span class="timeline-pill">Month 6</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RISK -->
+  <div class="risk-section">
+    <div class="section-label">Risk Mitigation</div>
+    <div class="risk-grid">
+      <div class="risk-card">
+        <div class="risk-title"><div class="risk-icon" style="background:rgba(16,185,129,0.15);color:#10B981">💾</div> Backup Strategy</div>
+        <div class="risk-text">Daily automated backups to GitHub and cloud storage. All code version-controlled on main branch.</div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-title"><div class="risk-icon" style="background:rgba(59,130,246,0.15);color:#3B82F6">🔒</div> Security</div>
+        <div class="risk-text">SSL certificates active. Security headers, regular vulnerability scans, uptime monitoring & error logging.</div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-title"><div class="risk-icon" style="background:rgba(245,158,11,0.15);color:#F59E0B">⚡</div> Performance</div>
+        <div class="risk-text">CDN caching, image optimisation, lazy loading. Target &lt;3s page load from day one.</div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-title"><div class="risk-icon" style="background:rgba(139,92,246,0.15);color:#8B5CF6">⚖️</div> Compliance</div>
+        <div class="risk-text">GDPR-compliant forms, privacy policy, data retention policies enforced across all properties.</div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-title"><div class="risk-icon" style="background:rgba(6,182,212,0.15);color:#06B6D4">📊</div> Monitoring</div>
+        <div class="risk-text">Uptime monitoring, performance alerts, weekly traffic analysis, quarterly SEO audits.</div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-title"><div class="risk-icon" style="background:rgba(239,68,68,0.15);color:#EF4444">🚨</div> Escalation</div>
+        <div class="risk-text">File GitHub issue → tag priority → assign owner → update stakeholders. Issues tracked at /Iammypictures/Sapspoliceclearancenz.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-left">
+      SAPS Police Clearance NZ &nbsp;·&nbsp; Deployment Workflow v1.0 &nbsp;·&nbsp; 2026-05-17
+    </div>
+    <div class="footer-links">
+      <a class="footer-link" href="https://github.com/Iammypictures/Sapspoliceclearancenz" target="_blank">↗ GitHub Repo</a>
+      <a class="footer-link" href="https://github.com/Iammypictures/Sapspoliceclearancenz/issues" target="_blank">↗ Issues</a>
+      <a class="footer-link" href="https://iamstiaan.github.io/Proteus/" target="_blank">↗ Proteus</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  function togglePhase(header) {
+    const phase = header.closest('.phase');
+    const btn = header.querySelector('.phase-toggle');
+    phase.classList.toggle('open');
+    btn.textContent = phase.classList.contains('open') ? 'Collapse ▲' : 'Expand ▼';
+  }
+
+  function toggleTask(item) {
+    item.classList.toggle('done');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    // Could be extended to show overall progress
+  }
+</script>
+
+</body>
+</html>
